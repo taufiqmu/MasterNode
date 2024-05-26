@@ -4,15 +4,31 @@
 #include <ModbusMaster.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
+#include <Arduino_JSON.h>
+#include <HTTPClient.h>
 
 // put function declarations here:
 void displayTask(void *parameters);
 void dataGetMB(void *parameters);
 void dataSendMB(void *parameters);
 void dataSendMQTT(void *parameters);
+void CheckDataChanged();
+void UpdateValues();
+void preTransmission();
+void postTransmission();
+String httpGETRequest(const char* serverName);
 
 const char *ssid = "Top";
 const char *pass = "9bdymykaqedqz72";
+String openWeatherMapApiKey = "accf82339c12902aaba436433d79c886";
+String city = "Surabaya";
+String countryCode ="ID";
+
+#define MODBUSID 1
+#define BAUDRATE 115200
+#define TFT_RST 14
+#define TFT_CS 33
+#define TFT_DC 26
 
 //Modbus Registers
 /******** Holding Register (0x03) *********/
@@ -30,14 +46,22 @@ const uint16_t regCoil = 0;
 const uint16_t coilPin = 27;
 
 ModbusIP mbIP;
+ModbusMaster node1;
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
-String temp, moist, soil, lumen;
+float temp, moist, soil, lumen, pres, hum;
+int temper;
+String wind;
+signed int holdingRegs[] = {0,6};
+signed int valueRegsHR[10];
+signed int checkValueHR[10];
+unsigned long lastTime = 0;
+unsigned long timerDelay = 2000;
+String jsonBuffer;
+
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
-  Serial2.begin(9600);
-
   WiFi.begin(ssid, pass);
   while(WiFi.status() != WL_CONNECTED){
     delay(500);
@@ -47,6 +71,10 @@ void setup() {
   Serial.println("WiFi Connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+ 
+  Serial.begin(115200);
+  Serial2.begin(115200);
+  node1.begin(MODBUSID, Serial2);
 
   mbIP.server();
 
@@ -64,31 +92,247 @@ void setup() {
   mbIP.addCoil(regCoil); //coil 0
 
   digitalWrite(coilPin, 0);
+
+  node1.preTransmission(preTransmission);
+  node1.postTransmission(postTransmission);
+
+  tft.initR(INITR_BLACKTAB);
+  tft.setRotation(3);
+  tft.fillScreen(ST7735_BLACK);
+
+  delay(500);
+
+  tft.fillScreen(ST7735_BLACK);
+  //layout
+  tft.drawFastHLine(0, 0, tft.width(), ST7735_WHITE);
+  tft.drawFastHLine(1, 127, tft.width(), ST7735_WHITE);
+  tft.drawFastVLine(0, 0, tft.height(), ST7735_WHITE);
+  tft.drawFastVLine(159, 0, tft.height(), ST7735_WHITE);
+  tft.drawFastVLine(80, 50, 40, ST7735_WHITE);
+  tft.drawFastHLine(1, 50, tft.width(), ST7735_WHITE);
+  tft.drawFastHLine(1, 90, tft.width(), ST7735_WHITE);
+  tft.setTextColor(ST7735_WHITE);
+  tft.setCursor(10,10);
+  tft.setTextSize(2);
+  tft.print(city);
+  tft.setTextSize(1);
+  tft.setCursor(10,35);
+  tft.print(countryCode);
+  tft.setTextSize(1);
+  
+  tft.setTextColor(ST7735_RED);
+  tft.setCursor(15,60);
+  tft.print("Humidity");
+  tft.setCursor(90,60);
+  tft.print("Soil Moist");
+  tft.setCursor(10,105);
+  tft.print("Lumen");
+  tft.setTextColor(ST7735_GREEN);
+  tft.setCursor(140,10);
+  tft.print(" C");
+  tft.setTextColor(ST7735_YELLOW);
+  tft.setCursor(42,75);
+  tft.print("%");
+  tft.setCursor(115,75);
+  tft.print("%");
+  tft.setCursor(115,105);
+  tft.print("%");
+
+  delay(1000); 
+
+  xTaskCreate(dataSendMB, "Send Modbus IP", 2048, NULL, 1, NULL);
+  xTaskCreate(dataGetMB, "Get Modbus Master", 2048, NULL, 1, NULL);
+  xTaskCreate(displayTask, "Display Data", 4096, NULL, 1, NULL);
+  //xTaskCreate(dataSendMQTT, "Send Over MQTT", 1024, NULL, 2, NULL);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  digitalWrite(coilPin, 1);
-  Serial.println("nilai1");
-  delay(5000);
-  digitalWrite(coilPin, 0); 
-  Serial.println("nilai0");
-  delay(5000);
 }
 
 void displayTask(void *parameters){
+  for(;;){
+    if ((millis() - lastTime) > timerDelay) {
+      if(WiFi.status()== WL_CONNECTED){
+        String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey;
+        
+        jsonBuffer = httpGETRequest(serverPath.c_str());
+        Serial.println(jsonBuffer);
+        JSONVar myObject = JSON.parse(jsonBuffer);
+        if (JSON.typeof(myObject) == "undefined") {
+          Serial.println("Parsing input failed!");
+          return;
+        }
+        String jsonString = JSON.stringify(myObject["main"]["temp"]);
+        temper=jsonString.toInt();
+        temper=(temper-273);
+        jsonString = JSON.stringify(myObject["main"]["pressure"]);
+        pres=jsonString.toInt();
+        jsonString = JSON.stringify(myObject["main"]["humidity"]);
+        hum=jsonString.toInt();
+        jsonString = JSON.stringify(myObject["wind"]["speed"]);
+        wind=jsonString;
+        Serial.println();
+        Serial.print("JSON object = ");
+        Serial.println(myObject);
+        Serial.print("Temperature: ");
+        Serial.println(temper);
+        Serial.print("Humidity: ");
+        Serial.println(moist);
+        Serial.print("Soil Moist: ");
+        Serial.println(soil);
+        Serial.print("Lumen: ");
+        Serial.println(lumen);
+        
+        tft.fillRect(105, 8 , 38, 30, ST7735_BLACK);
+        tft.fillRect(12, 70 , 32, 15, ST7735_BLACK);
+        tft.fillRect(97, 70 , 16, 15, ST7735_BLACK);
+        tft.fillRect(87, 103 , 25, 15, ST7735_BLACK);
+        tft.setTextColor(ST7735_GREEN);
+        tft.setTextSize(3);
+        tft.setCursor(108,10);
+        tft.print(temper);
+        tft.setTextColor(ST7735_YELLOW);
+        tft.setTextSize(1);
+        tft.setCursor(15,75);
+        tft.print(moist);
+        tft.setCursor(100,75);
+        tft.print(soil);
+        tft.setCursor(90,105);
+        tft.print(lumen);
+      }
+      else {
+        Serial.println("WiFi Disconnected");
+      }
+      lastTime = millis();
+    }
 
+    vTaskDelay(2000/portTICK_PERIOD_MS);
+  }
 }
 
-void dataGetMB(void *parameters){
+String httpGETRequest(const char* serverName) {
+  HTTPClient http;
+     
+  http.begin(serverName);
+  
+  int httpResponseCode = http.GET();
+  
+  String payload = "{}"; 
+  
+  if (httpResponseCode>0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    payload = http.getString();
+  }
+  else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
 
+  return payload;
+}
+
+
+void dataGetMB(void *parameters){
+  for(;;){
+    //Serial.println("masuk dataGetMB");
+    uint32_t i;
+    i++;
+
+    node1.setTransmitBuffer(0, lowWord(i));
+    node1.setTransmitBuffer(1, highWord(i));
+
+    int _resultHR = node1.readHoldingRegisters(holdingRegs[0], holdingRegs[1]);
+    if(_resultHR == node1.ku8MBSuccess){
+      for(int j = 0; j < holdingRegs[1]; j++){
+        valueRegsHR[j] = node1.getResponseBuffer(j);
+      }
+    }
+    CheckDataChanged();
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+  }
+}
+
+void CheckDataChanged(){
+  bool _dataChanged = false;
+  
+  for(int j = 0; j < holdingRegs[1]; j++){
+    if(valueRegsHR[j] != checkValueHR[j]){
+      checkValueHR[j] = valueRegsHR[j];
+      _dataChanged = true;
+    }
+  }
+
+  if(_dataChanged == true){
+    UpdateValues();
+  }
+}
+
+void UpdateValues(){
+    /*String tmpstr;
+    for(int j = 0; j < holdingRegs[1]; j++){
+      tmpstr = "Holding Reg " + String(j) + ": " + String(valueRegsHR[j]);
+      Serial.println(tmpstr);
+    }*/
+    
+    moist = valueRegsHR[0];
+    temp = valueRegsHR[1];
+    soil = valueRegsHR[2];
+    lumen = valueRegsHR[3];
+
+    Serial.println(moist);
+    Serial.println(temp);
+    Serial.println(soil);
+    Serial.println(lumen);
+    
+    delay(100);
+    
 }
 
 void dataSendMB(void *parameters){
-  mbIP.task();
+  for(;;){    
+    mbIP.task();
 
+    int _hInt = moist;
+    int _hDec = moist - _hInt;
+    mbIP.Hreg(0, _hInt);
+    mbIP.Hreg(1, _hDec);
+
+    int _tInt = temp;
+    int _tDec = temp - _tInt;
+    mbIP.Hreg(2, _tInt);
+    mbIP.Hreg(3, _tDec);
+
+    int _sInt = soil;
+    int _sDec = soil - _sInt;
+    mbIP.Hreg(4, _sInt);
+    mbIP.Hreg(5, _sDec);
+
+    int _lInt = lumen;
+    mbIP.Hreg(6, _lInt);
+
+    mbIP.task();
+
+    int _coil = mbIP.Coil(regCoil);
+    digitalWrite(coilPin, _coil);
+    //Serial.println(mbIP.Coil(regCoil));
+    vTaskDelay(200/portTICK_PERIOD_MS);
+    
+  }
 }
 
 void dataSendMQTT(void *Parameters){
+  for(;;){
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+  }
+}
 
+void preTransmission(){
+  Serial2.flush();
+}
+
+void postTransmission(){
+  delay(500);
 }
