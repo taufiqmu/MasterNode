@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include <ModbusIP_ESP8266.h>
 #include <SPI.h>
-#include <
+#include <ModbusMaster.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
 
 // put function declarations here:
 void displayTask(void *parameters);
