@@ -32,10 +32,10 @@ String countryCode ="ID";
 
 //Modbus Registers
 /******** Holding Register (0x03) *********/
-const uint16_t regAirMoistH = 0;
-const uint16_t regAirMoistL = 1;
-const uint16_t regAirTempH = 2;
-const uint16_t regAirTempL = 3;
+const uint16_t regAirTempH = 0;
+const uint16_t regAirTempL = 1;
+const uint16_t regAirMoistH = 2;
+const uint16_t regAirMoistL = 3;
 const uint16_t regSoilMoistH = 4;
 const uint16_t regSoilMoistL = 5;
 const uint16_t regLuxH = 6;
@@ -108,35 +108,41 @@ void setup() {
   tft.drawFastHLine(1, 127, tft.width(), ST7735_WHITE);
   tft.drawFastVLine(0, 0, tft.height(), ST7735_WHITE);
   tft.drawFastVLine(159, 0, tft.height(), ST7735_WHITE);
-  tft.drawFastVLine(80, 50, 40, ST7735_WHITE);
-  tft.drawFastHLine(1, 50, tft.width(), ST7735_WHITE);
-  tft.drawFastHLine(1, 90, tft.width(), ST7735_WHITE);
+  tft.drawFastVLine(80, 45, tft.height(), ST7735_WHITE);
+  tft.drawFastHLine(1, 45, tft.width(), ST7735_WHITE);
+  tft.drawFastHLine(1, 85, tft.width(), ST7735_WHITE);
   tft.setTextColor(ST7735_WHITE);
   tft.setCursor(10,10);
   tft.setTextSize(2);
   tft.print(city);
   tft.setTextSize(1);
-  tft.setCursor(10,35);
+  tft.setCursor(10,30);
   tft.print(countryCode);
   tft.setTextSize(1);
   
   tft.setTextColor(ST7735_RED);
-  tft.setCursor(15,60);
+  tft.setCursor(15,55);
   tft.print("Humidity");
-  tft.setCursor(90,60);
+  tft.setCursor(90,55);
   tft.print("Soil Moist");
-  tft.setCursor(10,105);
+  tft.setCursor(15,95);
   tft.print("Lumen");
+  tft.setCursor(90, 95);
+  tft.print("Temperature");
   tft.setTextColor(ST7735_GREEN);
   tft.setCursor(140,10);
   tft.print(" C");
   tft.setTextColor(ST7735_YELLOW);
-  tft.setCursor(42,75);
+  tft.setCursor(48,70);
   tft.print("%");
-  tft.setCursor(115,75);
+  tft.setCursor(123,70);
   tft.print("%");
-  tft.setCursor(115,105);
+  tft.setCursor(48,110);
   tft.print("%");
+  tft.setCursor(123, 108);
+  tft.print((char)248);
+  tft.setCursor(128, 110);
+  tft.print("C");
 
   delay(1000); 
 
@@ -185,25 +191,30 @@ void displayTask(void *parameters){
         Serial.println(lumen);
         
         tft.fillRect(105, 8 , 38, 30, ST7735_BLACK);
-        tft.fillRect(12, 70 , 32, 15, ST7735_BLACK);
-        tft.fillRect(97, 70 , 16, 15, ST7735_BLACK);
-        tft.fillRect(87, 103 , 25, 15, ST7735_BLACK);
+        tft.fillRect(10, 70 , 32, 10, ST7735_BLACK);
+        tft.fillRect(90, 70 , 32, 10, ST7735_BLACK);
+        tft.fillRect(10, 110, 32, 10, ST7735_BLACK);
+        tft.fillRect(90, 110, 32, 10, ST7735_BLACK);
+
         tft.setTextColor(ST7735_GREEN);
         tft.setTextSize(3);
         tft.setCursor(108,10);
         tft.print(temper);
         tft.setTextColor(ST7735_YELLOW);
         tft.setTextSize(1);
-        tft.setCursor(15,75);
+        tft.setCursor(15,70);
         tft.print(moist);
-        tft.setCursor(100,75);
+        tft.setCursor(90,70);
         tft.print(soil);
-        tft.setCursor(90,105);
+        tft.setCursor(15,110);
         tft.print(lumen);
+        tft.setCursor(90, 110);
+        tft.print(temp);
       }
       else {
         Serial.println("WiFi Disconnected");
       }
+      tft.flush();
       lastTime = millis();
     }
 
@@ -277,8 +288,8 @@ void UpdateValues(){
       Serial.println(tmpstr);
     }*/
     
-    moist = valueRegsHR[0];
-    temp = valueRegsHR[1];
+    temp = valueRegsHR[0];
+    moist = valueRegsHR[1];
     soil = valueRegsHR[2];
     lumen = valueRegsHR[3];
 
@@ -295,15 +306,15 @@ void dataSendMB(void *parameters){
   for(;;){    
     mbIP.task();
 
-    int _hInt = moist;
-    int _hDec = moist - _hInt;
-    mbIP.Hreg(0, _hInt);
-    mbIP.Hreg(1, _hDec);
-
     int _tInt = temp;
     int _tDec = temp - _tInt;
-    mbIP.Hreg(2, _tInt);
-    mbIP.Hreg(3, _tDec);
+    mbIP.Hreg(0, _tInt);
+    mbIP.Hreg(1, _tDec);
+
+    int _hInt = moist;
+    int _hDec = moist - _hInt;
+    mbIP.Hreg(2, _hInt);
+    mbIP.Hreg(3, _hDec);
 
     int _sInt = soil;
     int _sDec = soil - _sInt;
