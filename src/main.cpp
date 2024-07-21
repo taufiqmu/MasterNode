@@ -60,6 +60,11 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(coilPin, OUTPUT);
+  pinMode(STATUSBUTTON, INPUT);
+  pinMode(PUMPBUTTON, INPUT);
+  pinMode(AUTOBUTTON, INPUT);
+  pinMode(ENTERBUTTON, INPUT);
+
 
   MBSetup();
   mqtt.setup_mqtt();
@@ -101,9 +106,9 @@ void loop() {
 
 void displayTask(void *parameters){
   for(;;){
-    OledData();
+    //OledData();
     OledRun();
-    vTaskDelay(2000/portTICK_PERIOD_MS);
+    vTaskDelay(500/portTICK_PERIOD_MS);
   }
 }
 

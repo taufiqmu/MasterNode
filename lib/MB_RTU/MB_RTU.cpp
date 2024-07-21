@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ModbusMaster.h>
 #include "MB_RTU.h"
+#include "mqttcomm.h"
 
 void CheckDataChanged();
 void UpdateValues();

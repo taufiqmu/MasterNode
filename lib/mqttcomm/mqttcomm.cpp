@@ -2,7 +2,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "mqttcomm.h"
-
+#include "oledDisplay.h"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -18,12 +18,17 @@ void mqttcomm::setup_mqtt(){
 }
 
 void mqttcomm::loop_mqtt(){
+    
     if(!client.connected()){
-        reconnect(topicSubs1);
+        reconnect(topicSubs1, topicSubs2, topicSubs3);
     }
     client.loop();
-
-    publisher(topicPubs1, topicPubs1, topicPubs3, topicPubs4);
+    
+    client.publish(topicPubs1, sTemp.c_str());
+    client.publish(topicPubs2, sMoist.c_str());
+    client.publish(topicPubs3, sSoil.c_str());
+    client.publish(topicPubs4, sLumen.c_str());
+    // publisher(topicPubs1, topicPubs1, topicPubs3, topicPubs4);
 }
 
 /*!
@@ -59,12 +64,14 @@ void mqttcomm::publisher(const char *topic1, const char *topic2, const char *top
     client.publish(topic2, sLumen.c_str());
 }
 
-void mqttcomm::reconnect(const char* topic){
+void mqttcomm::reconnect(const char* topic1, const char* topic2, const char* topic3){
     while(!client.connected()){
         Serial.print("Attempting MQTT Connection...");
         if(client.connect("ESPClient")){
             Serial.println("connected");
-            client.subscribe(topic);
+            client.subscribe(topic1);
+            client.subscribe(topic2);
+            client.subscribe(topic3);
         }else{
             Serial.print("failed, rc = ");
             Serial.print(client.state());
@@ -103,11 +110,36 @@ void callback(char* topic, byte* payload, unsigned int length){
     }
     Serial.println();
     if(topictemp == "mfmelon/ghwates/kontrol/pompa/1"){
+        if(pumpControl == 1){
+            Serial.print(" ");
+            if(string == "true"){
+                string = "1";
+            }else if(string == "false"){
+                string = "0";
+            }
+            status = string.toInt();
+            Serial.print("status: ");
+            Serial.println(status);
+            digitalWrite(27, status);
+            delay(15);
+        }
+    }
+    
+    if(topictemp == "mfmelon/ghwates/state/manual/1"){
         Serial.print(" ");
         status = string.toInt();
-        Serial.print("status: ");
+        Serial.print("manual: ");
         Serial.println(status);
-        digitalWrite(27, status);
+        pumpControl = status;
+        delay(15);
+    }
+    
+    if(topictemp == "mfmelon/ghwates/state/auto/1"){
+        Serial.print(" ");
+        status = string.toInt();
+        Serial.print("auto: ");
+        Serial.println(status);
+        autoControl = status;
         delay(15);
     }
 }
