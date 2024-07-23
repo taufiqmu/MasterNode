@@ -9,7 +9,7 @@
 #define TFT_DC 26
 
 extern int temper, moist, soil, lumen, temp, pres, hum;
-extern bool pumpControl, autoControl;
+extern bool pumpControl, autoControl, relayState;
 
 const uint8_t STATUSBUTTON  = 37;
 const uint8_t PUMPBUTTON    = 32;

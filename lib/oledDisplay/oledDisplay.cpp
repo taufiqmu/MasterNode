@@ -3,9 +3,10 @@
 #include <Adafruit_ST7735.h>
 #include "oledDisplay.h"
 #include <WiFi.h>
-#include <Arduino.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
+#include "FlowSensor.h"
+#include "ScheduleWatering.h"
 
 void ButtonMenu(void);
 
@@ -184,7 +185,8 @@ void ButtonMenu(void){
     tft.setTextColor(ST7735_GREEN);
     tft.setTextSize(1);
     tft.setCursor(130,30);
-    tft.print("Auto");   
+    tft.print("Auto");
+    Schedule_Loop();
   }
   
   if(pumpControl == 1){

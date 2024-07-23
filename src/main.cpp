@@ -7,6 +7,8 @@
 #include "mqttcomm.h"
 #include "oledDisplay.h"
 #include "MB_RTU.h"
+#include "FlowSensor.h"
+#include "ScheduleWatering.h"
 
 #define __MODBUS_TCP__ (0)
 #define __MQTT__ (1)
@@ -42,8 +44,9 @@ ModbusIP mbIP;
 
 #if __MQTT__
 mqttcomm mqtt;
-const uint16_t coilPin = 27;
 #endif
+
+const uint16_t coilPin = 27;
 
 void setup() {
   // put your setup code here, to run once:
@@ -68,6 +71,8 @@ void setup() {
 
   MBSetup();
   mqtt.setup_mqtt();
+  Flow_Setup();
+  Schedule_Setup();
   
   #if __MODBUS_TCP__
   mbIP.server();
