@@ -90,15 +90,16 @@ void OledData(void){
           #endif
           return;
         }
-        String jsonString = JSON.stringify(myObject["main"]["temp"]);
-        temper=jsonString.toInt();
-        temper=(temper-273);
-        jsonString = JSON.stringify(myObject["main"]["pressure"]);
-        pres=jsonString.toInt();
-        jsonString = JSON.stringify(myObject["main"]["humidity"]);
-        hum=jsonString.toInt();
-        jsonString = JSON.stringify(myObject["wind"]["speed"]);
-        wind=jsonString;
+        
+        // String jsonString = JSON.stringify(myObject["main"]["temp"]);
+        // temper=jsonString.toInt();
+        // temper=(temper-273);
+        // jsonString = JSON.stringify(myObject["main"]["pressure"]);
+        // pres=jsonString.toInt();
+        // jsonString = JSON.stringify(myObject["main"]["humidity"]);
+        // hum=jsonString.toInt();
+        // jsonString = JSON.stringify(myObject["wind"]["speed"]);
+        // wind=jsonString;
         
         #if __DEBUG__
         Serial.println();

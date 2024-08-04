@@ -8,7 +8,7 @@
 #define TFT_CS 33
 #define TFT_DC 26
 
-extern int temper, moist, soil, lumen, temp, pres, hum;
+extern int moist, soil, lumen, temp;
 extern bool pumpControl, autoControl, relayState;
 
 const uint8_t STATUSBUTTON  = 37;

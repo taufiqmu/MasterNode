@@ -4,6 +4,7 @@
 #include "mqttcomm.h"
 #include "oledDisplay.h"
 #include "ScheduleWatering.h"
+#include "db.h"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -29,6 +30,8 @@ void mqttcomm::loop_mqtt(){
     client.publish(topicPubs2, sMoist.c_str());
     client.publish(topicPubs3, sSoil.c_str());
     client.publish(topicPubs4, sLumen.c_str());
+
+    //DBDataCreate();
     // publisher(topicPubs1, topicPubs1, topicPubs3, topicPubs4);
 }
 
@@ -58,7 +61,6 @@ void mqttcomm::setup_wifi(const char* id, const char* pass){
 
 
 void mqttcomm::publisher(const char *topic1, const char *topic2, const char *topic3, const char *topic4){ 
-    sTemp = "12";
     client.publish(topic1, sTemp.c_str());
     client.publish(topic2, sMoist.c_str());
     client.publish(topic2, sSoil.c_str());
