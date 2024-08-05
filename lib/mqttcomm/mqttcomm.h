@@ -15,7 +15,7 @@ class mqttcomm{
     private:    
     const char *mqtt_server = "broker.hivemq.com";
     const char *ssid        = "Top";
-    const char *password    = "1234567890";
+    const char *password    = "9bdymyka";
     const char *topicSubs1  = "mfmelon/ghwates/kontrol/pompa/1";
     const char *topicSubs2  = "mfmelon/ghwates/state/auto/1";
     const char *topicSubs3  = "mfmelon/ghwates/state/manual/1";

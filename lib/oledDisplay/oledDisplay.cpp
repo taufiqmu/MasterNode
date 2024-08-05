@@ -75,6 +75,49 @@ void OledSetup(void){
         tft.setCursor(128, 110);
         tft.print("C");
 }
+void OledDefault(void){
+        tft.fillScreen(ST7735_BLACK);
+        //layout
+        tft.drawFastHLine(0, 0, tft.width(), ST7735_WHITE);
+        tft.drawFastHLine(1, 127, tft.width(), ST7735_WHITE);
+        tft.drawFastVLine(0, 0, tft.height(), ST7735_WHITE);
+        tft.drawFastVLine(159, 0, tft.height(), ST7735_WHITE);
+        tft.drawFastVLine(80, 45, tft.height(), ST7735_WHITE);
+        tft.drawFastHLine(1, 45, tft.width(), ST7735_WHITE);
+        tft.drawFastHLine(1, 85, tft.width(), ST7735_WHITE);
+        tft.setTextColor(ST7735_WHITE);
+        tft.setCursor(50,10);
+        tft.setTextSize(2);
+        tft.print(id);
+        // tft.setTextSize(1);
+        // tft.setCursor(10,30);
+        // tft.print(autoControl);
+        
+        tft.setTextSize(1);
+        tft.setTextColor(ST7735_RED);
+        tft.setCursor(15,55);
+        tft.print("Humidity");
+        tft.setCursor(90,55);
+        tft.print("Soil Moist");
+        tft.setCursor(15,95);
+        tft.print("Lumen");
+        tft.setCursor(90, 95);
+        tft.print("Temperature");
+        // tft.setTextColor(ST7735_GREEN);
+        // tft.setCursor(140,10);
+        // tft.print(" C");
+        tft.setTextColor(ST7735_YELLOW);
+        tft.setCursor(48,70); 
+        tft.print("%");
+        tft.setCursor(123,70);
+        tft.print("%");
+        tft.setCursor(48,110);
+        tft.print("%");
+        tft.setCursor(123, 108);
+        tft.print((char)248);
+        tft.setCursor(128, 110);
+        tft.print("C");
+}
 
 void OledData(void){
     if ((millis() - lastTime) > timerDelay) {
@@ -198,11 +241,45 @@ void ButtonMenu(void){
     
     if(!digitalRead(ENTERBUTTON)){
       delay(20);
-      while(!digitalRead(ENTERBUTTON));
-      relayState = !relayState;
-      digitalWrite(COILPIN, relayState);
+      if(!digitalRead(ENTERBUTTON)){
+        while(!digitalRead(ENTERBUTTON));
+        relayState = !relayState;
+        digitalWrite(COILPIN, relayState);
+      }
     }
-  }  
+  } 
+
+  if(!digitalRead(STATUSBUTTON)){
+    delay(40);
+    if(!digitalRead(STATUSBUTTON)){tft.fillScreen(ST7735_BLACK);}
+    while(!digitalRead(STATUSBUTTON)){
+      tft.setTextColor(ST7735_WHITE);
+      tft.setTextSize(1);
+      tft.setCursor(5, 10);
+      tft.print("Jadwal 1: ");
+      tft.setTextColor(ST7735_YELLOW);
+      tft.print(waktu[0]);   
+      tft.print(":");
+      tft.print(waktu[1]);   
+      tft.setTextColor(ST7735_WHITE);
+      tft.setTextSize(1);
+      tft.setCursor(5, 20);
+      tft.print("Jadwal 2: ");
+      tft.setTextColor(ST7735_YELLOW);
+      tft.print(waktu[2]);   
+      tft.print(":");
+      tft.print(waktu[3]);   
+      tft.setTextColor(ST7735_WHITE);
+      tft.setTextSize(1);
+      tft.setCursor(5, 30);
+      tft.print("Jadwal 3: ");
+      tft.setTextColor(ST7735_YELLOW);
+      tft.print(waktu[4]);   
+      tft.print(":");
+      tft.print(waktu[5]);   
+    }
+    OledDefault();
+  } 
   
   if(!digitalRead(PUMPBUTTON)){
     preMillButton = millis();

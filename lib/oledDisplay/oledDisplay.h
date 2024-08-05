@@ -11,7 +11,7 @@
 extern int moist, soil, lumen, temp;
 extern bool pumpControl, autoControl, relayState;
 
-const uint8_t STATUSBUTTON  = 37;
+const uint8_t STATUSBUTTON  = 34;
 const uint8_t PUMPBUTTON    = 32;
 const uint8_t AUTOBUTTON    = 35;
 const uint8_t ENTERBUTTON   = 25;

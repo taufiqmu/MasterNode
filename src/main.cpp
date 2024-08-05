@@ -22,7 +22,7 @@ void dataSendMB(void *parameters);
 #endif
 
 const char *ssid            = "Top";
-const char *pass            = "1234567890";
+const char *pass            = "9bdymyka";
 
 #if __MODBUS_TCP__
 //Modbus Registers TCP
@@ -50,7 +50,10 @@ const uint16_t coilPin = 27;
 
 void setup() {
   // put your setup code here, to run once:
-  WiFi.begin(ssid, pass);
+  Serial.begin(115200);
+  
+  /*WiFi.begin(ssid, pass);
+  
   while(WiFi.status() != WL_CONNECTED){
     delay(500);
     Serial.print(".");
@@ -58,10 +61,8 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi Connected");
   Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
- 
-  Serial.begin(115200);
-
+  Serial.println(WiFi.localIP()); 
+*/
   pinMode(coilPin, OUTPUT);
   pinMode(STATUSBUTTON, INPUT);
   pinMode(PUMPBUTTON, INPUT);
