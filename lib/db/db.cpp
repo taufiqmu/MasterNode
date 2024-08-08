@@ -16,7 +16,7 @@ String node = "1";
 bool upsert = true;
 
 unsigned long prevMillDB = 0;
-unsigned long intervalDB = 5000;
+unsigned long intervalDB = 60000;
 
 Supabase db;
 
@@ -27,7 +27,7 @@ void DBDataCreate(void){
   unsigned long currMillDB = millis();
   if(currMillDB - prevMillDB > intervalDB){
     //String JSON = "{\"time\": \"NOW()\", \"lumen\":" + sLumen + ", \"soil\":" + sSoil + ", \"moist\":" + sMoist + ", \"temp\":" + sTemp + ", \"id_gh\":" + node + "}";
-    String JSON = "{\"time\": \"NOW()\", \"lumen\":" + String(23) + ", \"soil\":" + String(20) + ", \"moist\":" + String(111) + ", \"temp\":" + String(200) + ", \"id_gh\":" + node + "}";
+    String JSON = "{\"time\": \"NOW()\", \"lumen\":" + sLumen + ", \"soil\":" + sSoil + ", \"moist\":" + sMoist + ", \"temp\":" + sTemp + ", \"id_gh\":" + node + "}";
     postData(JSON);
     //String data2Send = "{\"datetime\": \"NOW()\", \"lumen\":" + sLumen + ", \"soil\":" + sSoil + ", \"moist\":" + sMoist + ", \"temp\":" + sTemp + ", \"id_gh\":" + 1 + "}";
     // sendData2Server(data2Send);

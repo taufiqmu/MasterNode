@@ -7,6 +7,7 @@
 #include <Arduino_JSON.h>
 #include "FlowSensor.h"
 #include "ScheduleWatering.h"
+#include "db.h"
 
 void ButtonMenu(void);
 
@@ -69,7 +70,7 @@ void OledSetup(void){
         tft.setCursor(123,70);
         tft.print("%");
         tft.setCursor(48,110);
-        tft.print("%");
+        tft.print("lx");
         tft.setCursor(123, 108);
         tft.print((char)248);
         tft.setCursor(128, 110);
@@ -112,7 +113,7 @@ void OledDefault(void){
         tft.setCursor(123,70);
         tft.print("%");
         tft.setCursor(48,110);
-        tft.print("%");
+        tft.print("lx");
         tft.setCursor(123, 108);
         tft.print((char)248);
         tft.setCursor(128, 110);
@@ -230,7 +231,7 @@ void ButtonMenu(void){
     tft.setTextSize(1);
     tft.setCursor(130,30);
     tft.print("Auto");
-    Schedule_Loop();
+    //Schedule_Loop();
   }
   
   if(pumpControl == 1){
@@ -256,6 +257,12 @@ void ButtonMenu(void){
       tft.setTextColor(ST7735_WHITE);
       tft.setTextSize(1);
       tft.setCursor(5, 10);
+      tft.print("Node: ");
+      tft.setTextColor(ST7735_YELLOW);
+      tft.print(node);   
+      tft.setTextColor(ST7735_WHITE);
+      tft.setTextSize(1);
+      tft.setCursor(5, 50);
       tft.print("Jadwal 1: ");
       tft.setTextColor(ST7735_YELLOW);
       tft.print(waktu[0]);   
@@ -263,7 +270,7 @@ void ButtonMenu(void){
       tft.print(waktu[1]);   
       tft.setTextColor(ST7735_WHITE);
       tft.setTextSize(1);
-      tft.setCursor(5, 20);
+      tft.setCursor(5, 60);
       tft.print("Jadwal 2: ");
       tft.setTextColor(ST7735_YELLOW);
       tft.print(waktu[2]);   
@@ -271,7 +278,7 @@ void ButtonMenu(void){
       tft.print(waktu[3]);   
       tft.setTextColor(ST7735_WHITE);
       tft.setTextSize(1);
-      tft.setCursor(5, 30);
+      tft.setCursor(5, 70);
       tft.print("Jadwal 3: ");
       tft.setTextColor(ST7735_YELLOW);
       tft.print(waktu[4]);   

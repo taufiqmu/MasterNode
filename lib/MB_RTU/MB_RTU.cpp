@@ -2,6 +2,7 @@
 #include <ModbusMaster.h>
 #include "MB_RTU.h"
 #include "mqttcomm.h"
+#include "db.h"
 
 void CheckDataChanged();
 void UpdateValues();
@@ -68,8 +69,8 @@ void UpdateValues(){
       Serial.println(tmpstr);
     }*/
     
-    temp = valueRegsHR[0];
-    moist = valueRegsHR[1];
+    temp = valueRegsHR[1];
+    moist = valueRegsHR[0];
     soil = valueRegsHR[2];
     lumen = valueRegsHR[3];
 
@@ -78,11 +79,11 @@ void UpdateValues(){
     sSoil = String(soil);
     sLumen = String(lumen);
  
-    Serial.println(moist);
-    Serial.println(temp);
-    Serial.println(soil);
-    Serial.println(lumen);
-    
+    // Serial.println(moist);
+    // Serial.println(temp);
+    // Serial.println(soil);
+    // Serial.println(lumen);
+    //DBDataCreate();   
     delay(100);
     
 }

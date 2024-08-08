@@ -12,12 +12,13 @@
 #include "db.h"
 
 #define __MODBUS_TCP__ (0)
-#define __MQTT__ (1)
+#define __MQTT__ (0)
 
 // put function declarations here:
 void displayTask(void *parameters);
 void dataGetMB(void *parameters);
-void dataSendMQTT(void *parameters);
+//void dataSendMQTT(void *parameters);
+void DBSend(void *Parameters);
 #if __MODBUS_TCP__
 void dataSendMB(void *parameters);
 #endif
@@ -64,17 +65,17 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP()); 
 
-  // pinMode(coilPin, OUTPUT);
-  // pinMode(STATUSBUTTON, INPUT);
-  // pinMode(PUMPBUTTON, INPUT);
-  // pinMode(AUTOBUTTON, INPUT);
-  // pinMode(ENTERBUTTON, INPUT);
+  pinMode(coilPin, OUTPUT);
+  pinMode(STATUSBUTTON, INPUT);
+  pinMode(PUMPBUTTON, INPUT);
+  pinMode(AUTOBUTTON, INPUT);
+  pinMode(ENTERBUTTON, INPUT);
 
 
-  // MBSetup();
-  // mqtt.setup_mqtt();
-  // Flow_Setup();
-  // Schedule_Setup();
+  MBSetup();
+  //mqtt.setup_mqtt();
+  Flow_Setup();
+  //Schedule_Setup();
   
   #if __MODBUS_TCP__
   mbIP.server();
@@ -95,26 +96,25 @@ void setup() {
   digitalWrite(coilPin, 0);
   #endif
   
-  // OledSetup();
-  // delay(1000); 
+  OledSetup();
+  delay(1000); 
 
-  // #if __MODBUS_TCP__
-  // xTaskCreate(dataSendMB, "Send Modbus IP", 2048, NULL, 1, NULL);
-  // #endif
+  #if __MODBUS_TCP__
+  xTaskCreate(dataSendMB, "Send Modbus IP", 2048, NULL, 1, NULL);
+  #endif
 
-  // xTaskCreate(dataGetMB, "Get Modbus Master", 2048, NULL, 1, NULL);
-  // xTaskCreate(displayTask, "Display Data", 4096, NULL, 1, NULL);
-  // xTaskCreate(dataSendMQTT, "Send Over MQTT", 2048, NULL, 1, NULL);
+  xTaskCreate(dataGetMB, "Get Modbus Master", 2048, NULL, 1, NULL);
+  xTaskCreate(displayTask, "Display Data", 4096, NULL, 1, NULL);
+  //xTaskCreate(dataSendMQTT, "Send Over MQTT", 2048, NULL, 1, NULL);
+  xTaskCreate(DBSend, "Send to PostgreSQL", 8192, NULL, 1, NULL);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  DBDataCreate();
 }
 
 void displayTask(void *parameters){
   for(;;){
-    //OledData();
     OledRun();
     vTaskDelay(500/portTICK_PERIOD_MS);
   }
@@ -127,10 +127,17 @@ void dataGetMB(void *parameters){
   }
 }
 
-void dataSendMQTT(void *Parameters){
+// void dataSendMQTT(void *Parameters){
+//   for(;;){
+//     mqtt.loop_mqtt();
+//     vTaskDelay(2000/portTICK_PERIOD_MS);
+//   }
+// }
+
+void DBSend(void *Parameters){
   for(;;){
-    mqtt.loop_mqtt();
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+    DBDataCreate();
+    vTaskDelay(100/portTICK_PERIOD_MS);
   }
 }
 
