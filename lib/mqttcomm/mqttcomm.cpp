@@ -14,7 +14,7 @@ int status;
 String sTemp, sMoist, sSoil, sLumen;
 
 void mqttcomm::setup_mqtt(){
-    setup_wifi(ssid, password);
+    //setup_wifi(ssid, password);
     client.setServer(mqtt_server, 1883);
     client.setCallback(callback);
 }
