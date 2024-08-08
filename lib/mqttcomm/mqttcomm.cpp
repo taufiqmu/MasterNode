@@ -31,7 +31,7 @@ void mqttcomm::loop_mqtt(){
     client.publish(topicPubs3, sSoil.c_str());
     client.publish(topicPubs4, sLumen.c_str());
 
-    //DBDataCreate();
+    DBDataCreate();
     // publisher(topicPubs1, topicPubs1, topicPubs3, topicPubs4);
 }
 
