@@ -4,6 +4,6 @@
 extern String node;
 
 void DBDataCreate(void);
-void postData(String jsno);
+void postData(String json);
 
 #endif

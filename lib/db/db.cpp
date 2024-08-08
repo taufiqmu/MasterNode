@@ -12,7 +12,7 @@ void postData(String json);
 const char* supabaseURL = "https://edggtblrgdscfjhkznkw.supabase.co";
 const char* supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZ2d0YmxyZ2RzY2ZqaGt6bmt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjMwMDUwNzIsImV4cCI6MjAzODU4MTA3Mn0.TtYY0AVPuVbQcJBBTXDvdPxEh6ffiUjL81XqIrHHqb4";
 String table = "dataNode";
-String node = "1";
+String node = "2";
 bool upsert = true;
 
 unsigned long prevMillDB = 0;
